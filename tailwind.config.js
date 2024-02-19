@@ -1,0 +1,48 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./components/**/*.{js,vue,ts}",
+    "./pages/**/*.vue",
+    "./app.vue",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        BK00: '#000000',
+        WT00: '#FFFFFF',
+        G100: '#F2F2F2',
+        G200: '#D9D9D9',
+        G300: '#AFAFAF',
+        G400: '#353637',
+        GRC0: '#44454A',
+        GAC0: '#C4C0C0',
+        B100: '#DCEDF6',
+        B200: '#B7D1FF',
+        B300: '#1C7CD5',
+        B400: '#2B6CB0',
+        B500: '#007599',
+        B600: '#053EB5',
+        B700: '#003B4D',
+        BRC0: '#009BCC',
+        BRC1: '#1E3565',
+        O100: '#FCF7E4',
+        O200: '#F0AD4E',
+        O300: '#E67700',
+        O400: '#BF6102',
+        OAC0: '#FF8400',
+        OAC1: '#BF6102',
+        GN10: '#D4EDDA',
+        GN20: '#2CB83F',
+        TL10: '#14CC99',
+        ID10: '#7F9CF5',
+        PP10: '#6B46C1',
+        PP20: '#CA1E79',
+        RD10: '#EB0000',
+        RD20: '#C1272D',
+        RD30: '#F2DEDF',
+      },
+    },
+  },
+  plugins: [],
+}
+
