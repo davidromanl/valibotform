@@ -56,7 +56,7 @@ function onSubmit({ data }: FormSubmitEvent<Schema>) {
       <UForm
         :schema="schema"
         :state="booking"
-        class="space-y-4"
+        class="space-y-3"
         @submit="onSubmit"
       >
         <div class="md:flex gap-5 w-full">
@@ -138,7 +138,7 @@ function onSubmit({ data }: FormSubmitEvent<Schema>) {
           ></IconChevon>
         </div>
 
-        <div class="md:flex items-end gap-5 overflow-hidden px-1 pb-1 duration-150" :class="{ 'h-0 -translate-y-2': !optInfo }">
+        <div v-if="optInfo" class="md:flex items-end gap-5 p-1.5 duration-150 border border-G100 rounded-b">
           <UFormGroup 
           :label="$t('reservation.FlightNumber')"
           name="flightNumber" class="w-full">
@@ -149,9 +149,11 @@ function onSubmit({ data }: FormSubmitEvent<Schema>) {
             name="flightNumber"
             class="w-full"
           >
-            <USelect select-class="bg-G100" v-model="flyOptions.fFlyerCarrier" :options="optAirlines"
-            :placeholder="$t('generalText.select')"
-            ></USelect>
+            <USelectMenu
+              select-class="bg-G100"
+              v-model="flyOptions.fFlyerCarrier" searchable
+              :options="optAirlines" :placeholder="$t('generalText.select')"
+              option-attribute="label" value-attribute="value"></USelectMenu>
           </UFormGroup>
           <UFormGroup
             :label="$t('reservation.FrequentFlyerNumber')"
