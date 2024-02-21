@@ -2,11 +2,16 @@
 import { string, objectAsync, email, custom, number, minLength, type Input } from "valibot"
 import type { FormSubmitEvent } from '#ui/types'
 import AirlineService from "@/services/AirlineService"
+import CountryService from "@/services/CountryService"
 const { t } = useI18n()
 
 const ages = ["21-24", "25+"]
 const optInfo = shallowRef(false)
 const airlines = AirlineService.getAirlines()
+const countrieService = CountryService.getCountries()
+const countries = computed(() => 
+  Object.keys(countrieService).map((key) => ({ label: countrieService[key].name, value: key }))
+)
 
 const booking = reactive({
   first_name: "",
@@ -24,6 +29,12 @@ const flyOptions = reactive({
   fFlyerNbr: "",
 })
 
+const payment = reactive({
+  countryID: "",
+  city: "",
+  address: "",
+})
+
 const schema = objectAsync({
   first_name: string([minLength(1, t('generalText.emptyValue'))]),
   last_name: string([minLength(1, t('generalText.emptyValue'))]),
@@ -34,6 +45,9 @@ const schema = objectAsync({
   ]),
   phoneNumber: number(t('generalText.numberNotValid')),
   age: string([minLength(1, t('generalText.emptyValue'))]),
+  countryID: string([minLength(1, t('generalText.emptyValue'))]),
+  city: string([minLength(1, t('generalText.emptyValue'))]),
+  address: string([minLength(1, t('generalText.emptyValue'))]),
 })
 
 type Schema = Input<typeof schema>
@@ -55,14 +69,14 @@ function onSubmit({ data }: FormSubmitEvent<Schema>) {
       </h3>
       <UForm
         :schema="schema"
-        :state="booking"
+        :state="{...booking, ...payment}"
         class="space-y-3"
         @submit="onSubmit"
       >
         <div class="md:flex gap-5 w-full">
           <UFormGroup :label="$t('reservation.FirstName') + ' *'" name="first_name" class="w-full pt-1">
             <UInput
-              input-class="bg-G100"
+              input-class="rounded border bg-G100 py-2 px-3"
               v-model="booking.first_name"
               :placeholder="$t('reservation.FirstName')"
             />
@@ -70,7 +84,7 @@ function onSubmit({ data }: FormSubmitEvent<Schema>) {
 
           <UFormGroup :label="$t('reservation.LastName') + ' *'" name="last_name" class="w-full pt-1">
             <UInput
-              input-class="bg-G100"
+              input-class="rounded border bg-G100 py-2 px-3"
               v-model="booking.last_name"
               :placeholder="$t('reservation.LastName')"
             />
@@ -80,7 +94,7 @@ function onSubmit({ data }: FormSubmitEvent<Schema>) {
         <div class="md:flex gap-5 w-full">
           <UFormGroup :label="$t('reservation.Email') + ' *'" name="email" class="w-full pt-1">
             <UInput
-              input-class="bg-G100"
+              input-class="rounded border bg-G100 py-2 px-3"
               v-model="booking.email"
               :placeholder="$t('reservation.Email')"
             />
@@ -88,7 +102,7 @@ function onSubmit({ data }: FormSubmitEvent<Schema>) {
 
           <UFormGroup :label="$t('reservation.ConfirmYourEmail') + ' *'" name="secondEmail" class="w-full pt-1">
             <UInput
-              input-class="bg-G100"
+              input-class="rounded border bg-G100 py-2 px-3"
               @paste.prevent=""
               v-model="booking.secondEmail"
               :placeholder="$t('reservation.ConfirmYourEmail')"
@@ -99,7 +113,7 @@ function onSubmit({ data }: FormSubmitEvent<Schema>) {
         <div class="md:flex gap-5 w-full">
           <UFormGroup :label="$t('reservation.PhoneNumber') + ' *'" name="phoneNumber" class="w-full pt-1">
             <UInput
-              input-class="bg-G100"
+              input-class="rounded border bg-G100 py-2 px-3"
               v-model="booking.phoneNumber"
               type="number"
               placeholder="(XXX) XXX-XXXX"
@@ -107,7 +121,7 @@ function onSubmit({ data }: FormSubmitEvent<Schema>) {
           </UFormGroup>
           <UFormGroup :label="$t('reservation.Age') + ' *'" name="age" class="w-full pt-1">
             <USelect
-              select-class="bg-G100"
+              select-class="rounded border bg-G100 py-2 px-3"
               v-model="booking.age"
               :options="ages"
               :placeholder="$t('generalText.select')"
@@ -142,7 +156,7 @@ function onSubmit({ data }: FormSubmitEvent<Schema>) {
           <UFormGroup 
           :label="$t('reservation.FlightNumber')"
           name="flightNumber" class="w-full">
-            <UInput input-class="bg-G100" v-model="flyOptions.flight_number" placeholder="Ex: AA1234" />
+            <UInput input-class="rounded border bg-G100 py-2 px-3" v-model="flyOptions.flight_number" placeholder="Ex: AA1234" />
           </UFormGroup>
           <UFormGroup
             :label="$t('reservation.AirlineLoyaltyProgram')"
@@ -150,7 +164,7 @@ function onSubmit({ data }: FormSubmitEvent<Schema>) {
             class="w-full"
           >
             <USelectMenu
-              select-class="bg-G100"
+              select-class="rounded border bg-G100 py-2 px-3"
               v-model="flyOptions.fFlyerCarrier" searchable
               :options="optAirlines" :placeholder="$t('generalText.select')"
               option-attribute="label" value-attribute="value"></USelectMenu>
@@ -160,16 +174,47 @@ function onSubmit({ data }: FormSubmitEvent<Schema>) {
             name="flightNumber"
             class="w-full"
           >
-            <UInput :placeholder="$t('reservation.FrequentFlyerNumber')" v-model="flyOptions.fFlyerNbr" input-class="bg-G100" />
+            <UInput :placeholder="$t('reservation.FrequentFlyerNumber')"
+              v-model="flyOptions.fFlyerNbr"
+              input-class="rounded border bg-G100 py-2 px-3" />
           </UFormGroup>
         </div>
 
-        <div class="text-BRC0 font-bold text-xl">{{ $t("reservation.PaymentInformation") }}</div>
+        <div class="text-BRC0 font-bold text-xl">
+          <img class="float-end" src="@/assets/img/cards.png" alt="">
+          {{ $t("reservation.PaymentInformation") }}
+        </div>
         <p class="text-GRC0 text-sm">
           {{ $t("reservation.TheseAreTheFinalDetails") }}
         </p>
-        <div class="p-10 border text-center text-G300">
-          stripe
+
+        <div class="w-full md:flex gap-4">
+          <UFormGroup :label="$t('reservation.CreditCardNumber') + ' *'" class="w-full md:w-2/3">
+            <UInput input-class="rounded border bg-G100 py-2 px-3"
+              :placeholder="$t('reservation.CreditCardNumber')"></UInput>
+          </UFormGroup>
+          <UFormGroup :label="$t('reservation.CountryOfIssuance') + ' *'"
+            name="countryID" class="w-full md:w-1/3">
+            <USelectMenu v-model="payment.countryID"
+              :options="countries" searchable
+              option-attribute="label" value-attribute="value"
+              select-class="rounded border bg-G100 py-2 px-3"></USelectMenu>
+          </UFormGroup>
+        </div>
+
+        <div class="w-full md:flex gap-4">
+          <UFormGroup :label="$t('reservation.City') + ' *'"
+            name="city" class="w-full md:w-1/3">
+            <UInput v-model="payment.city"
+              input-class="rounded border bg-G100 py-2 px-3"
+              :placeholder="$t('reservation.City')"></UInput>
+          </UFormGroup>
+          <UFormGroup :label="$t('reservation.Address') + ' *'"
+            name="address" class="w-full md:w-2/3">
+            <UInput v-model="payment.address"
+              input-class="rounded border bg-G100 py-2 px-3"
+              :placeholder="$t('reservation.Address')"></UInput>
+          </UFormGroup>
         </div>
 
         <hr>
@@ -189,12 +234,15 @@ function onSubmit({ data }: FormSubmitEvent<Schema>) {
       </div>
     </div>
 
-    <div class="w-1/3 p-4 mt-4 text-xs border">
+    <div class="w-full md:w-1/3 p-4 mt-4 text-xs border">
       <strong>booking:</strong>
       <pre>{{ booking }}</pre>
       <hr class="my-4">
       <strong>flyOptions:</strong>
       <pre>{{ flyOptions }}</pre>
+      <hr class="my-4">
+      <strong>payment:</strong>
+      <pre>{{ payment }}</pre>
     </div>
   </div>
 </template>
